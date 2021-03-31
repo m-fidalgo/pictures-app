@@ -4,6 +4,7 @@ import { SafeAreaView, StyleSheet, ScrollView, Button } from "react-native";
 import Breadcrumb from "./components/Breadcrumb";
 import DirectoryList from "./components/DirectoryList";
 import ImageList from "./components/ImageList";
+import ImageDialog from "./components/ImageDialog";
 
 export default function App() {
   const [directories, setDirectories] = useState([{ name: "a" }]);
@@ -37,17 +38,42 @@ export default function App() {
         "https://i.pinimg.com/originals/2a/32/d9/2a32d9c19606ec633b0582fadf187e16.png",
     },
   ]);
+  const [currentImage, setCurrentImage] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
 
-  function onSelect() {}
+  function onSelectBreadcrumb() {}
+
+  function onSelectDirectory() {}
+
+  function onSelectImg(img) {
+    setIsOpen(true);
+    setCurrentImage(img);
+  }
+
+  function onCloseDialog() {
+    setIsOpen(false);
+    setCurrentImage({});
+  }
+
+  function onRemoveImg() {}
 
   return (
     <SafeAreaView style={styles.container}>
-      <Breadcrumb onSelect={onSelect} currentDirectory={currentDirectory} />
+      <Breadcrumb
+        onSelect={onSelectBreadcrumb}
+        currentDirectory={currentDirectory}
+      />
       <ScrollView style={styles.scrollContainer}>
-        <DirectoryList onSelect={onSelect} directories={directories} />
-        <ImageList images={imageList} onPress={onSelect} />
+        <DirectoryList onSelect={onSelectDirectory} directories={directories} />
+        <ImageList images={imageList} onSelect={onSelectImg} />
       </ScrollView>
       <Button title="Add" />
+      <ImageDialog
+        image={currentImage}
+        isOpen={isOpen}
+        onClose={onCloseDialog}
+        onRemove={onRemoveImg}
+      />
     </SafeAreaView>
   );
 }
