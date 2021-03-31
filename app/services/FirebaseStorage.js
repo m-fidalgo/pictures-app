@@ -1,4 +1,7 @@
 import firebase from "firebase";
+import CameraRoll from "@react-native-community/cameraroll";
+import ImagePicker from "react-native-image-picker";
+import fs from "react-native-fs";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAbM5DoEKAKsTSftGPkIFZMcVKtiq0Gz5c",
@@ -26,5 +29,40 @@ export const FirebaseStorage = {
     );
 
     return { imgList, directoryList, currentDirectory: currentStorageRef };
+  },
+  async uploadImg(currentStorageRef = storageRef) {
+    return new Promise((resolve, reject) => {
+      ImagePicker.showImagePicker(
+        {
+          title: "Select a picture",
+        },
+        async (response) => {
+          if (response.uri) {
+            const blob = await (await fetch("file://" + response.path)).blob();
+            currentStorageRef
+              .child(response.fileName)
+              .put(blob, { contentType: response.type });
+            resolve(currentStorageRef);
+          } else {
+            reject();
+          }
+        }
+      );
+    });
+  },
+  async downloadImg(imgRef) {
+    const fileName = `${fs.DocumentDirectoryPath}/${imgRef.name}`;
+    const result = fs.downloadFile({
+      fromUrl: imgRef.uri,
+      toFile: fileName,
+    });
+
+    await result.promise;
+    await CameraRoll.save(`file://${fileName}`);
+
+    return fileName;
+  },
+  async removeImg(imgRef) {
+    return imgRef.delete();
   },
 };

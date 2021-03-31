@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, StyleSheet, ScrollView, Button } from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  ScrollView,
+  Button,
+  RefreshControl,
+} from "react-native";
 import { FirebaseStorage } from "./services/FirebaseStorage";
 
 import Breadcrumb from "./components/Breadcrumb";
@@ -33,6 +39,10 @@ export default function App() {
     }
   }
 
+  function onRefresh() {
+    listContent(currentDirectory);
+  }
+
   function onSelectImg(img) {
     setIsOpen(true);
     setCurrentImage(img);
@@ -43,16 +53,31 @@ export default function App() {
     setCurrentImage({});
   }
 
-  function onRemoveImg() {}
+  async function onRemoveImg(img) {
+    await FirebaseStorage.removeImg(img);
+    onRefresh();
+    onCloseDialog();
+  }
+
+  async function onAddImg() {
+    await FirebaseStorage.uploadImg(currentDirectory);
+    onRefresh();
+    onCloseDialog();
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <Breadcrumb onSelect={listContent} currentDirectory={currentDirectory} />
-      <ScrollView style={styles.scrollContainer}>
+      <ScrollView
+        style={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
+        }
+      >
         <DirectoryList onSelect={listContent} directories={directories} />
         <ImageList images={imageList} onSelect={onSelectImg} />
       </ScrollView>
-      <Button title="Add" />
+      <Button title="Add" onPress={onAddImg} />
       <ImageDialog
         image={currentImage}
         isOpen={isOpen}

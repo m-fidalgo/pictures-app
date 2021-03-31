@@ -1,9 +1,12 @@
 import React from "react";
 import { StyleSheet, View, Image } from "react-native";
 import Dialog from "react-native-dialog";
+import { FirebaseStorage } from "../../services/FirebaseStorage";
 
 export default function ImageDialog(props) {
-  function download() {}
+  async function download() {
+    await FirebaseStorage.downloadImg(props.image);
+  }
 
   function cutTitle(title) {
     const limit = 30;
