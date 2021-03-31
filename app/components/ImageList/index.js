@@ -10,8 +10,11 @@ import {
 export default function ImageList(props) {
   return (
     <View style={styles.imgContainer}>
-      {props.images.map((image, index) => (
-        <TouchableHighlight key={index} onPress={() => props.onSelect(image)}>
+      {props.images.map((image) => (
+        <TouchableHighlight
+          key={image.uri}
+          onPress={() => props.onSelect(image)}
+        >
           <Image style={styles.img} source={{ uri: image.uri }} />
         </TouchableHighlight>
       ))}

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView, StyleSheet, ScrollView, Button } from "react-native";
+import { FirebaseStorage } from "./services/FirebaseStorage";
 
 import Breadcrumb from "./components/Breadcrumb";
 import DirectoryList from "./components/DirectoryList";
@@ -7,43 +8,30 @@ import ImageList from "./components/ImageList";
 import ImageDialog from "./components/ImageDialog";
 
 export default function App() {
-  const [directories, setDirectories] = useState([{ name: "a" }]);
-  const [currentDirectory, setCurrentDirectory] = useState({
-    name: "abc",
-    parent: {},
-  });
-  const [imageList, setImageList] = useState([
-    {
-      uri:
-        "https://64.media.tumblr.com/a4879580229187b20d2867306297ffb6/tumblr_oqlqapn66L1u280k8o1_1280.png",
-    },
-    {
-      uri:
-        "https://pm1.narvii.com/6482/fef9ad73513c9304925f91ce803a99b0751133d4_hq.jpg",
-    },
-    {
-      uri:
-        "https://i.pinimg.com/originals/2a/32/d9/2a32d9c19606ec633b0582fadf187e16.png",
-    },
-    {
-      uri:
-        "https://64.media.tumblr.com/a4879580229187b20d2867306297ffb6/tumblr_oqlqapn66L1u280k8o1_1280.png",
-    },
-    {
-      uri:
-        "https://pm1.narvii.com/6482/fef9ad73513c9304925f91ce803a99b0751133d4_hq.jpg",
-    },
-    {
-      uri:
-        "https://i.pinimg.com/originals/2a/32/d9/2a32d9c19606ec633b0582fadf187e16.png",
-    },
-  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [directories, setDirectories] = useState([]);
+  const [currentDirectory, setCurrentDirectory] = useState({});
+  const [imageList, setImageList] = useState([]);
   const [currentImage, setCurrentImage] = useState({});
   const [isOpen, setIsOpen] = useState(false);
 
-  function onSelectBreadcrumb() {}
+  useEffect(() => {
+    listContent();
+  }, []);
 
-  function onSelectDirectory() {}
+  async function listContent(dir) {
+    try {
+      setIsLoading(true);
+      const resp = await FirebaseStorage.listAll(dir);
+      setImageList(resp.imgList);
+      setDirectories(resp.directoryList);
+      setCurrentDirectory(resp.currentDirectory);
+      setIsLoading(false);
+      return resp;
+    } catch (err) {
+      console.log("error:", err);
+    }
+  }
 
   function onSelectImg(img) {
     setIsOpen(true);
@@ -59,12 +47,9 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Breadcrumb
-        onSelect={onSelectBreadcrumb}
-        currentDirectory={currentDirectory}
-      />
+      <Breadcrumb onSelect={listContent} currentDirectory={currentDirectory} />
       <ScrollView style={styles.scrollContainer}>
-        <DirectoryList onSelect={onSelectDirectory} directories={directories} />
+        <DirectoryList onSelect={listContent} directories={directories} />
         <ImageList images={imageList} onSelect={onSelectImg} />
       </ScrollView>
       <Button title="Add" />

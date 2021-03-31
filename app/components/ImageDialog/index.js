@@ -17,7 +17,7 @@ export default function ImageDialog(props) {
   return (
     <View>
       <Dialog.Container visible={props.isOpen}>
-        <Dialog.Title>{cutTitle("a")}</Dialog.Title>
+        <Dialog.Title>{cutTitle(props.image.name || "")}</Dialog.Title>
         <View style={styles.imgContainer}>
           <Image style={styles.img} source={{ uri: props.image.uri }} />
         </View>
